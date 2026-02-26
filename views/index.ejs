@@ -1,76 +1,90 @@
 <%- include('partials/header') %>
 
-<div class="container">
-  <!-- Summary Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card text-white bg-info">
-        <div class="card-body text-center">
-          <h5 class="card-title">Week Of</h5>
-          <h3><%= meetingData.weekOf %></h3>
+<div class="container pb-5">
+  <!-- Summary Stat Cards -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-3 col-6">
+      <div class="card stat-card stat-card-week h-100">
+        <div class="card-body">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Week Of</div>
+          <div class="stat-value" style="font-size:1.3rem;"><%= meetingData.weekOf %></div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-white bg-secondary">
-        <div class="card-body text-center">
-          <h5 class="card-title">Scheduled</h5>
-          <h2><%= meetingData.totalScheduled %></h2>
+    <div class="col-md-3 col-6">
+      <div class="card stat-card stat-card-scheduled h-100">
+        <div class="card-body">
+          <div class="stat-icon">🗓️</div>
+          <div class="stat-label">Scheduled</div>
+          <div class="stat-value"><%= meetingData.totalScheduled %></div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-white bg-success">
-        <div class="card-body text-center">
-          <h5 class="card-title">Attended</h5>
-          <h2><%= meetingData.attended %></h2>
+    <div class="col-md-3 col-6">
+      <div class="card stat-card stat-card-attended h-100">
+        <div class="card-body">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Attended</div>
+          <div class="stat-value"><%= meetingData.attended %></div>
         </div>
       </div>
     </div>
-    <div class="col-md-3">
-      <div class="card text-white bg-danger">
-        <div class="card-body text-center">
-          <h5 class="card-title">Missed</h5>
-          <h2><%= meetingData.missed %></h2>
+    <div class="col-md-3 col-6">
+      <div class="card stat-card stat-card-missed h-100">
+        <div class="card-body">
+          <div class="stat-icon">❌</div>
+          <div class="stat-label">Missed</div>
+          <div class="stat-value"><%= meetingData.missed %></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts Row -->
-  <div class="row">
-    <!-- Pie Chart -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h5>Attendance Overview</h5>
-        </div>
+  <!-- Attendance Rate + Time Spent -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-4">
+      <div class="card rate-card h-100">
         <div class="card-body">
+          <div class="rate-label">Attendance Rate</div>
+          <div class="rate-value">
+            <%= meetingData.totalScheduled > 0 ? Math.round((meetingData.attended / meetingData.totalScheduled) * 100) : 0 %>%
+          </div>
+          <div class="progress-bar-custom">
+            <div class="progress-bar-fill" style="width:<%= meetingData.totalScheduled > 0 ? Math.round((meetingData.attended / meetingData.totalScheduled) * 100) : 0 %>%"></div>
+          </div>
+          <div style="font-size:0.82rem;margin-top:0.5rem;opacity:0.85;">
+            <%= meetingData.attended %> of <%= meetingData.totalScheduled %> meetings attended
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card time-card h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <div class="time-label">⏱ Total Time in Meetings</div>
+          <div class="time-value"><%= meetingData.totalAttendedTime %></div>
+        </div>
+      </div>
+    </div>
+    <!-- Donut Chart -->
+    <div class="col-md-4">
+      <div class="card chart-card h-100">
+        <div class="card-header">Attendance Overview</div>
+        <div class="card-body d-flex align-items-center justify-content-center">
           <canvas id="pieChart"></canvas>
         </div>
       </div>
     </div>
-    
-    <!-- Bar Chart -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h5>Daily Breakdown</h5>
-        </div>
-        <div class="card-body">
-          <canvas id="barChart"></canvas>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <!-- Time Spent -->
-  <div class="row mt-4">
+  <!-- Bar Chart Row -->
+  <div class="row g-3">
     <div class="col-12">
-      <div class="card bg-light">
-        <div class="card-body text-center">
-          <h5>Total Time in Attended Meetings</h5>
-          <h2 class="text-primary"><%= meetingData.totalAttendedTime %></h2>
+      <div class="card chart-card">
+        <div class="card-header">Daily Breakdown</div>
+        <div class="card-body">
+          <canvas id="barChart"></canvas>
         </div>
       </div>
     </div>
@@ -78,7 +92,8 @@
 </div>
 
 <script>
-  // Pie Chart - Attended vs Missed
+window.addEventListener('load', function () {
+  // Doughnut Chart - Attended vs Missed
   const pieCtx = document.getElementById('pieChart').getContext('2d');
   new Chart(pieCtx, {
     type: 'doughnut',
@@ -86,16 +101,16 @@
       labels: ['Attended', 'Missed'],
       datasets: [{
         data: [<%= meetingData.attended %>, <%= meetingData.missed %>],
-        backgroundColor: ['#198754', '#dc3545'],
-        borderWidth: 2
+        backgroundColor: ['#00c48c', '#ff4d67'],
+        borderWidth: 0,
+        hoverOffset: 8
       }]
     },
     options: {
       responsive: true,
+      cutout: '70%',
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
   });
@@ -105,17 +120,23 @@
   new Chart(barCtx, {
     type: 'bar',
     data: {
-      labels: [<%= meetingData.dailyBreakdown.map(d => `'${d.day}'`).join(',') %>],
+      labels: <%- JSON.stringify(meetingData.dailyBreakdown.map(d => d.day)) %>,
       datasets: [
         {
           label: 'Scheduled',
-          data: [<%= meetingData.dailyBreakdown.map(d => d.scheduled).join(',') %>],
-          backgroundColor: '#6c757d'
+          data: <%- JSON.stringify(meetingData.dailyBreakdown.map(d => d.scheduled)) %>,
+          backgroundColor: 'rgba(13,202,240,0.25)',
+          borderColor: '#0dcaf0',
+          borderWidth: 2,
+          borderRadius: 6
         },
         {
           label: 'Attended',
-          data: [<%= meetingData.dailyBreakdown.map(d => d.attended).join(',') %>],
-          backgroundColor: '#198754'
+          data: <%- JSON.stringify(meetingData.dailyBreakdown.map(d => d.attended)) %>,
+          backgroundColor: 'rgba(0,196,140,0.7)',
+          borderColor: '#00c48c',
+          borderWidth: 2,
+          borderRadius: 6
         }
       ]
     },
@@ -123,16 +144,19 @@
       responsive: true,
       scales: {
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        x: {
+          grid: { display: false }
         }
       },
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
   });
+}); // end window.load
 </script>
 
 </body>

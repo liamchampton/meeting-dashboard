@@ -11,6 +11,14 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve vendor assets from node_modules
+app.use('/vendor/bootstrap.min.css', express.static(
+  path.join(__dirname, 'node_modules/bootstrap/dist/css/bootstrap.min.css')
+));
+app.use('/vendor/chart.umd.js', express.static(
+  path.join(__dirname, 'node_modules/chart.js/dist/chart.umd.js')
+));
+
 // Sample meeting data (replace with WorkIQ integration)
 function getMeetingData() {
   // This will be replaced with actual WorkIQ MCP data
