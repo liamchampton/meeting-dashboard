@@ -1,0 +1,139 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-info">
+        <div class="card-body text-center">
+          <h5 class="card-title">Week Of</h5>
+          <h3><%= meetingData.weekOf %></h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-secondary">
+        <div class="card-body text-center">
+          <h5 class="card-title">Scheduled</h5>
+          <h2><%= meetingData.totalScheduled %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body text-center">
+          <h5 class="card-title">Attended</h5>
+          <h2><%= meetingData.attended %></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-danger">
+        <div class="card-body text-center">
+          <h5 class="card-title">Missed</h5>
+          <h2><%= meetingData.missed %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row">
+    <!-- Pie Chart -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Attendance Overview</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bar Chart -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Daily Breakdown</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Spent -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-body text-center">
+          <h5>Total Time in Attended Meetings</h5>
+          <h2 class="text-primary"><%= meetingData.totalAttendedTime %></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Pie Chart - Attended vs Missed
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+  new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Attended', 'Missed'],
+      datasets: [{
+        data: [<%= meetingData.attended %>, <%= meetingData.missed %>],
+        backgroundColor: ['#198754', '#dc3545'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+
+  // Bar Chart - Daily Breakdown
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels: [<%= meetingData.dailyBreakdown.map(d => `'${d.day}'`).join(',') %>],
+      datasets: [
+        {
+          label: 'Scheduled',
+          data: [<%= meetingData.dailyBreakdown.map(d => d.scheduled).join(',') %>],
+          backgroundColor: '#6c757d'
+        },
+        {
+          label: 'Attended',
+          data: [<%= meetingData.dailyBreakdown.map(d => d.attended).join(',') %>],
+          backgroundColor: '#198754'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
